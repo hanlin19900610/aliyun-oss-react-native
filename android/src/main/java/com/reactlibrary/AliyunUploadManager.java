@@ -1,7 +1,5 @@
 package com.reactlibrary;
 
-import android.annotation.SuppressLint;
-import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.MediaStore;
@@ -34,7 +32,6 @@ import com.alibaba.sdk.android.oss.model.UploadPartResult;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactContext;
-import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
@@ -79,13 +76,16 @@ public class AliyunUploadManager {
         Cursor cursor = null;
         try {
             String[] proj = {MediaStore.Images.Media.DATA};
-            cursor = context.getCurrentActivity().getContentResolver().query(selectedVideoUri, proj, null, null, null);
-            if (cursor == null) sourceFile = selectedVideoUri.getPath();
-            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-            cursor.moveToFirst();
-            sourceFile = cursor.getString(column_index);
+            cursor = context.getContentResolver().query(selectedVideoUri, proj, null, null, null);
+            if (cursor == null) {
+                sourceFile = selectedVideoUri.getPath();
+            }else{
+                int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+                cursor.moveToFirst();
+                sourceFile = cursor.getString(column_index);
+            }
         } catch (Exception e) {
-            sourceFile = FileUtils.getFilePathFromURI(context.getCurrentActivity(), selectedVideoUri);
+            sourceFile = FileUtils.getFilePathFromURI(context, selectedVideoUri);
         } finally {
             if (cursor != null) {
                 cursor.close();
@@ -94,7 +94,7 @@ public class AliyunUploadManager {
         // init upload request
         PutObjectRequest put = new PutObjectRequest(bucketName, ossFile, sourceFile);
         ObjectMetadata metadata = new ObjectMetadata();
-        metadata.setContentType("application/octet-stream");
+        metadata.setContentType(options.getString("contentType"));
         put.setMetadata(metadata);
 
         // set callback
@@ -147,13 +147,13 @@ public class AliyunUploadManager {
         Cursor cursor = null;
         try {
             String[] proj = {MediaStore.Images.Media.DATA};
-            cursor = context.getCurrentActivity().getContentResolver().query(selectedVideoUri, proj, null, null, null);
+            cursor = context.getContentResolver().query(selectedVideoUri, proj, null, null, null);
             if (cursor == null) uploadFilePath = selectedVideoUri.getPath();
             int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
             cursor.moveToFirst();
             uploadFilePath = cursor.getString(column_index);
         } catch (Exception e) {
-            uploadFilePath = FileUtils.getFilePathFromURI(context.getCurrentActivity(), selectedVideoUri);
+            uploadFilePath = FileUtils.getFilePathFromURI(context, selectedVideoUri);
         } finally {
             if (cursor != null) {
                 cursor.close();
@@ -283,13 +283,13 @@ public class AliyunUploadManager {
         Cursor cursor = null;
         try {
             String[] proj = {MediaStore.Images.Media.DATA};
-            cursor = context.getCurrentActivity().getContentResolver().query(selectedVideoUri, proj, null, null, null);
+            cursor = context.getContentResolver().query(selectedVideoUri, proj, null, null, null);
             if (cursor == null) filepath = selectedVideoUri.getPath();
             int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
             cursor.moveToFirst();
             filepath = cursor.getString(column_index);
         } catch (Exception e) {
-            filepath = FileUtils.getFilePathFromURI(context.getCurrentActivity(), selectedVideoUri);
+            filepath = FileUtils.getFilePathFromURI(context, selectedVideoUri);
         } finally {
             if (cursor != null) {
                 cursor.close();
